@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -21,7 +22,7 @@ class DatabaseSeeder extends Seeder
             'title' => 'مدیر'
         ]);
 
-        Role::create([
+        $serviceProviderRole = Role::create([
             'id' => Role::SERVICE_PROVIDER_ROLE_ID,
             'name' => 'service_provider',
             'title' => 'میزبان'
@@ -45,6 +46,8 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password')
         ]);
 
-        $adminUser->roles()->attach($adminRole);
+        $adminUser->roles()->attach([$adminRole, $serviceProviderRole]);
+
+        Artisan::call('iran:import');
     }
 }

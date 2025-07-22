@@ -10,9 +10,12 @@ class UserController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::paginate(10);
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
+
+        $users = User::paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
             'meta' => [
@@ -73,7 +76,7 @@ class UserController
         User::findOrFail($id)->delete();
 
         return response()->json([
-            'status' => 'success'
+            'status' => 'SUCCESS'
         ]);
     }
 }

@@ -41,7 +41,8 @@ class AuthController
         OTPService::send($user->phone);
 
         return response()->json([
-            'status' => 'verification_code_sent',
+            'status' => 'SUCCESS',
+            'message' => 'VERIFICATION_CODE_SENT',
             'user' => $user
         ]);
     }
@@ -55,7 +56,7 @@ class AuthController
         OTPService::send($request->input('phone'));
 
         return response()->json([
-            'status' => 'verification_code_sent'
+            'status' => 'VERIFICATION_CODE_SENT'
         ]);
     }
 
@@ -96,7 +97,7 @@ class AuthController
 
 
         return response()->json([
-            'status' => 'phone_verified',
+            'status' => 'PHONE_VERIFIED',
             'token' => $user->createToken('Auth_token')->plainTextToken
         ]);
     }
