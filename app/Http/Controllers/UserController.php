@@ -12,7 +12,17 @@ class UserController
      */
     public function index()
     {
-        //
+        $users = User::paginate(10);
+
+        return response()->json([
+            'meta' => [
+                'current_page' => $users->currentPage(),
+                'total' => $users->total(),
+                'per_page' => $users->perPage(),
+                'last_page' => $users->lastPage(),
+            ],
+            'data' => $users->items()
+        ]);
     }
 
     /**
@@ -20,7 +30,7 @@ class UserController
      */
     public function create()
     {
-        //
+
     }
 
     /**
@@ -60,6 +70,10 @@ class UserController
      */
     public function destroy(string $id)
     {
-        //
+        User::findOrFail($id)->delete();
+
+        return response()->json([
+            'status' => 'success'
+        ]);
     }
 }
