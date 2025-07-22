@@ -5,6 +5,14 @@ use App\Http\Controllers\UserController;
 use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccommodationController;
+use App\Http\Controllers\ConfigController;
+
+Route::prefix('config')
+    ->name('config.')
+    ->group(function() {
+        Route::get('/provinces', [ConfigController::class, 'provinces'])->name('provinces');
+        Route::get('/{province}/cities', [ConfigController::class, 'cities'])->name('province.cities');
+    });
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('users')
