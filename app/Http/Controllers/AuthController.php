@@ -18,8 +18,8 @@ class AuthController
             'first_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
             'phone' => ['required', 'string', 'regex:/09\d{9}/', 'unique:users,id'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'user_type' => ['required', 'in:service_provider,service_consumer']
+            'password' => ['required', 'string', 'min:8'],
+            'user_type' => ['nullable', 'in:service_provider,service_consumer']
         ]);
 
         $user = User::create([
@@ -29,7 +29,7 @@ class AuthController
             'password' => Hash::make($request->input('password'))
         ]);
 
-        switch ($request->input('user_type')) {
+        switch ($request->input('user_type', null)) {
             case 'service_provider':
                 $user->roles()->attach(Role::SERVICE_PROVIDER_ROLE_ID);
                 break;

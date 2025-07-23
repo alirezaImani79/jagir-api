@@ -16,6 +16,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $email
  * @property string $password
  * @property string $phone
+ *
+ * @method bool hasAnyOfRoles(array $roles)
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $email_verified_at
@@ -57,9 +59,9 @@ class User extends Authenticatable
         ];
     }
 
-    public function hasRole(string $role): bool
+    public function hasAnyOfRoles(array $roles): bool
     {
-        return $this->roles->where('name', $role)->count() == 1;
+        return $this->roles->whereIn('name', $roles)->count() >= 1;
     }
 
     public function roles(): BelongsToMany

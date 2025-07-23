@@ -7,6 +7,7 @@ use App\Models\IranCity;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AccommodationController
 {
@@ -28,6 +29,11 @@ class AccommodationController
         $orderDirection = $request->input('order_direction', 'desc');
         abort_if(! in_array($orderBy, ['created_at', 'price_per_day']) || ! in_array($orderDirection, ['desc', 'asc']), 400, 'ORDER_PARAMETERS_ARE_NOT_VALID');
 
+        $owner = null;
+        if($request->input('owner_id', null)) {
+            $owner = User::findOrFail($request->input('owner_id'));
+        }
+
         $accommodations = Accommodation::when($nameFilter, function(Builder $query) use ($nameFilter) {
             $query->where('name', 'like', "%$nameFilter%");
         })
@@ -36,6 +42,9 @@ class AccommodationController
         })
         ->when(count($cityIdsFilter) > 0, function(Builder $query) use ($cityIdsFilter) {
             $query->whereIn('city_id', $cityIdsFilter);
+        })
+        ->when($owner, function(Builder $query) use ($owner) {
+            $query->where('owner_id', $owner->id);
         })
         ->orderBy($orderBy, $orderDirection)
         ->paginate($perPage, ['*'], 'page', $page);
@@ -51,7 +60,7 @@ class AccommodationController
         ]);
     }
 
-    public function show(Request $request, Accommodation $accommodation)
+    public function show(Accommodation $accommodation)
     {
         return $accommodation;
     }
@@ -61,7 +70,9 @@ class AccommodationController
         $request->validate([
             'name' => ['required', 'string'],
             'description' => ['nullable', 'string'],
-            'owner_id' => ['required', 'exists:users,id'],
+            'owner_id' => [Rule::requiredIf(function() {
+                return ! auth('sanctum')->user()->hasOneOfRoles(['service_provider']);
+            })],
             'province_id' => ['required', 'exists:iran_provinces,id'],
             'city_id' => ['required', 'exists:iran_cities,id'],
             'address' => ['required', 'string'],
@@ -70,14 +81,14 @@ class AccommodationController
         ]);
 
         $owner = User::find($request->input('owner_id'));
-        abort_if(! $owner->hasRole('service_provider'), 400, 'SPECIFIED_OWNER_IS_NOT_A_SERVICE_PROVIDER');
+        abort_if(! $owner->hasAnyOfRoles(['service_provider']), 400, 'SPECIFIED_OWNER_IS_NOT_A_SERVICE_PROVIDER');
 
         abort_if($request->input('province_id') != IranCity::find($request->input('city_id'))->province_id, 400, 'CITY_DOES_NOT_BELONG_TO_PROVINCE');
 
         $accommodation = Accommodation::create([
             'name' => $request->input('name'),
             'description' => $request->input('description',null),
-            'owner_id' => $request->input('owner_id'),
+            'owner_id' => auth('sanctum')->user()->hasOneOfRoles(['service_provider']) ? auth('sanctum')->user()->id : $request->input('owner_id'),
             'city_id' => $request->input('city_id'),
             'province_id' => $request->input('province_id'),
             'address' => $request->input('address'),

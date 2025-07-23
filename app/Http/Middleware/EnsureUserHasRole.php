@@ -13,11 +13,11 @@ class EnsureUserHasRole
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (! $request->user()->hasRole($role)) {
+        if (! auth('sanctum')->user()?->hasAnyOfRoles($roles)) {
             return response()->json([
-                'status' => 'error'
+                'status' => 'UNAUTHORIZED'
             ], 403);
         }
 
