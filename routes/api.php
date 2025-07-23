@@ -48,3 +48,10 @@ Route::prefix('auth')->name('auth.')->group(function () {
     Route::post('otp/verify', [AuthController::class, 'verifyOTPCode']);
     Route::post('otp/send', [AuthController::class, 'sentOtpCode']);
 });
+
+
+Route::fallback(function () {
+    return response()->json([
+        'message' => 'Not Found.'
+    ], 404);
+});
