@@ -17,7 +17,8 @@ class AuthController
         $request->validate([
             'first_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
-            'phone' => ['required', 'string', 'regex:/09\d{9}/', 'unique:users,id'],
+            'phone' => ['nullable', 'string', 'regex:/09\d{9}/', 'unique:users,id'],
+            'email' => ['required', 'email'],
             'password' => ['required', 'string', 'min:8'],
             'user_type' => ['nullable', 'in:service_provider,service_consumer']
         ]);
@@ -26,6 +27,8 @@ class AuthController
             'first_name' => $request->input('first_name'),
             'last_name' => $request->input('last_name'),
             'phone' => $request->input('phone'),
+            'email' => $request->input('email'),
+            'email_verified_at' => now(),
             'password' => Hash::make($request->input('password'))
         ]);
 
@@ -44,6 +47,26 @@ class AuthController
             'status' => 'SUCCESS',
             'message' => 'VERIFICATION_CODE_SENT',
             'user' => $user
+        ]);
+    }
+
+    public function login(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string']
+        ]);
+
+        $user = User::where('email', $request->input('email'))->first();
+        if($user && Hash::check($request->input('password'), $user->password)) {
+            return response()->json([
+                'token' => $user->createToken('Auth_token')->plainTextToken,
+                'user' => $user
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'CREDENTIALS_ARE_NOT_VALID'
         ]);
     }
 

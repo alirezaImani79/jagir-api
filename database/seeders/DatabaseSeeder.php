@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Role;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
@@ -43,7 +42,7 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
             'identity_verified_at' => now(),
             'phone_verified_at' => now(),
-            'password' => Hash::make('password')
+            'password' => 'password'
         ]);
 
         $adminUser->roles()->attach([$adminRole, $serviceProviderRole]);

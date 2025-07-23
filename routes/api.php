@@ -45,6 +45,7 @@ Route::prefix('accommodations')
 
 Route::prefix('auth')->name('auth.')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
     Route::post('otp/verify', [AuthController::class, 'verifyOTPCode']);
     Route::post('otp/send', [AuthController::class, 'sentOtpCode']);
 });
